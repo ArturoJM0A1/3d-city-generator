@@ -13,6 +13,50 @@ export class SceneManager {
         this.fps = 0;
         this.frameCount = 0;
         this.lastFpsUpdate = 0;
+        this.isDarkTheme = true;
+        
+        this.themes = {
+            dark: {
+                background: 0x1a1a2e,
+                fog: 0x1a1a2e,
+                fogDensity: 0.0008,
+                ambient: 0x404050,
+                ambientIntensity: 0.4,
+                hemisphere: 0x87ceeb,
+                hemisphereGround: 0x3d3d3d,
+                hemisphereIntensity: 0.5,
+                sun: 0xfff5e6,
+                sunIntensity: 1.5,
+                sunPosition: { x: 200, y: 400, z: 150 },
+                fill: 0x8899aa,
+                fillIntensity: 0.3,
+                fillPosition: { x: -100, y: 100, z: -100 },
+                exposure: 1.2,
+                ground: 0x1a1a2e,
+                groundRoughness: 0.9,
+                bloomStrength: 0.3
+            },
+            light: {
+                background: 0xb8d4e8,
+                fog: 0xc8dde8,
+                fogDensity: 0.0004,
+                ambient: 0xffffff,
+                ambientIntensity: 0.8,
+                hemisphere: 0x87ceeb,
+                hemisphereGround: 0x8b7355,
+                hemisphereIntensity: 0.6,
+                sun: 0xfffaf0,
+                sunIntensity: 2.0,
+                sunPosition: { x: 300, y: 500, z: 200 },
+                fill: 0xaaccff,
+                fillIntensity: 0.5,
+                fillPosition: { x: -200, y: 200, z: -100 },
+                exposure: 1.0,
+                ground: 0x8fa87a,
+                groundRoughness: 0.95,
+                bloomStrength: 0.15
+            }
+        };
         
         this.init();
     }
@@ -124,13 +168,13 @@ export class SceneManager {
         const renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
         
-        const bloomPass = new UnrealBloomPass(
+        this.bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
             0.3,
             0.4,
             0.85
         );
-        this.composer.addPass(bloomPass);
+        this.composer.addPass(this.bloomPass);
         
         const smaaPass = new SMAAPass(
             window.innerWidth * this.renderer.getPixelRatio(),
@@ -159,6 +203,82 @@ export class SceneManager {
         this.sunLight.position.x = Math.cos(angle) * radius;
         this.sunLight.position.y = Math.sin(angle) * radius * 0.7 + 200;
         this.sunLight.position.z = Math.sin(angle * 0.5) * radius * 0.3;
+    }
+    
+    setTheme(isDark) {
+        this.isDarkTheme = isDark;
+        const theme = isDark ? this.themes.dark : this.themes.light;
+        
+        this.scene.background = new THREE.Color(theme.background);
+        this.scene.fog = new THREE.FogExp2(new THREE.Color(theme.fog), theme.fogDensity);
+        
+        this.scene.children.forEach(child => {
+            if (child instanceof THREE.AmbientLight) {
+                child.color.setHex(theme.ambient);
+                child.intensity = theme.ambientIntensity;
+            }
+            if (child instanceof THREE.HemisphereLight) {
+                child.color.setHex(theme.hemisphere);
+                child.groundColor.setHex(theme.hemisphereGround);
+                child.intensity = theme.hemisphereIntensity;
+            }
+            if (child instanceof THREE.DirectionalLight && child !== this.fillLight) {
+                child.color.setHex(theme.sun);
+                child.intensity = theme.sunIntensity;
+                child.position.set(theme.sunPosition.x, theme.sunPosition.y, theme.sunPosition.z);
+            }
+            if (child === this.fillLight) {
+                child.color.setHex(theme.fill);
+                child.intensity = theme.fillIntensity;
+                child.position.set(theme.fillPosition.x, theme.fillPosition.y, theme.fillPosition.z);
+            }
+        });
+        
+        this.renderer.toneMappingExposure = theme.exposure;
+        
+        this.scene.traverse(child => {
+            if (child.userData?.type === 'ground' && child.material) {
+                child.material.color.setHex(theme.ground);
+                child.material.roughness = theme.groundRoughness;
+            }
+        });
+        
+        if (this.bloomPass) {
+            this.bloomPass.strength = theme.bloomStrength;
+        }
+        
+        this.updateBuildingMaterials();
+    }
+    
+    updateBuildingMaterials() {
+        const isDark = this.isDarkTheme;
+        
+        this.scene.traverse(child => {
+            if (child.userData?.type === 'building' && child.material) {
+                const baseColor = child.userData.buildingData?.color;
+                
+                if (baseColor) {
+                    const color = new THREE.Color(baseColor);
+                    
+                    if (isDark) {
+                        color.multiplyScalar(0.7);
+                    } else {
+                        color.multiplyScalar(1.3);
+                        color.clampScalar(0, 1);
+                    }
+                    
+                    child.material.color.copy(color);
+                }
+            }
+            
+            if (child.userData?.type === 'road' && child.material) {
+                if (isDark) {
+                    child.material.color.multiplyScalar(0.8);
+                } else {
+                    child.material.color.setHex(0x555555);
+                }
+            }
+        });
     }
     
     render() {

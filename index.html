@@ -243,6 +243,131 @@
             border-color: #667eea;
             color: #fff;
         }
+        
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #theme-toggle:hover {
+            background: rgba(20, 20, 20, 0.9);
+            border-color: #667eea;
+        }
+        
+        #theme-toggle .icon {
+            font-size: 18px;
+        }
+        
+        body.light-theme {
+            background: #e8e8e8;
+        }
+        
+        body.light-theme #loading-overlay {
+            background: #f5f5f5;
+        }
+        
+        body.light-theme .loader {
+            border-color: rgba(100, 100, 200, 0.2);
+            border-top-color: #4466aa;
+        }
+        
+        body.light-theme .loading-text {
+            color: #555;
+        }
+        
+        body.light-theme #theme-toggle {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        body.light-theme #theme-toggle:hover {
+            background: #fff;
+            border-color: #4466aa;
+        }
+        
+        body.light-theme .ui-panel {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        body.light-theme .ui-panel h1 {
+            background: linear-gradient(135deg, #4466aa 0%, #5588cc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        
+        body.light-theme .ui-panel p,
+        body.light-theme .stat-label {
+            color: #666;
+        }
+        
+        body.light-theme .location-search input {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        
+        body.light-theme .location-search input::placeholder {
+            color: #999;
+        }
+        
+        body.light-theme .preset-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #666;
+        }
+        
+        body.light-theme .preset-btn:hover {
+            background: rgba(68, 102, 170, 0.2);
+            border-color: #4466aa;
+            color: #333;
+        }
+        
+        body.light-theme #controls-hint {
+            background: rgba(255, 255, 255, 0.8);
+            color: #666;
+        }
+        
+        body.light-theme #controls-hint kbd {
+            background: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        
+        body.light-theme #info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            color: #000;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+        
+        body.light-theme #info-panel h3 {
+            color: #333;
+        }
+        
+        body.light-theme #info-panel .info-row {
+            color: #444;
+        }
+        
+        body.light-theme #info-panel .info-row span {
+            color: #000;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -252,6 +377,11 @@
     </div>
     
     <div id="canvas-container"></div>
+    
+    <button id="theme-toggle">
+        <span class="icon">🌙</span>
+        <span class="text">Modo Oscuro</span>
+    </button>
     
     <div id="ui-overlay">
         <div class="ui-panel">

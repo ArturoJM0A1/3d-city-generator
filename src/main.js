@@ -99,6 +99,24 @@ class CityGenerator {
                 this.moveToLocation(lat, lon);
             });
         });
+        
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('.icon');
+        const themeText = themeToggle.querySelector('.text');
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('light-theme');
+            
+            if (isDark) {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Modo Claro';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Modo Oscuro';
+            }
+            
+            this.sceneManager.setTheme(!isDark);
+        });
     }
     
     handleLocationSearch(value) {
