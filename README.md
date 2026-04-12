@@ -320,9 +320,6 @@ MIT License - Libre para uso comercial y personal.
 - [Overpass API Documentation](https://wiki.openstreetmap.org/wiki/Overpass_API)
 - [WebGPU Specification](https://www.w3.org/TR/webgpu/)
 
-## 👤 Autor
-
-Generado con [OpenCode](https://opencode.ai)
 
 ---
 

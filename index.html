@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D City Generator - OpenStreetMap</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+        
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        #ui-overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .ui-panel {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            color: #fff;
+            min-width: 280px;
+        }
+        
+        .ui-panel h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .ui-panel p {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.5;
+        }
+        
+        .stats-panel {
+            font-size: 12px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .stat-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            color: #888;
+            font-size: 14px;
+        }
+        
+        #info-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            color: #fff;
+            min-width: 250px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #info-panel.visible {
+            display: block;
+        }
+        
+        #info-panel h3 {
+            font-size: 14px;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        #info-panel .info-row {
+            font-size: 12px;
+            padding: 3px 0;
+            color: #aaa;
+        }
+        
+        #info-panel .info-row span {
+            color: #fff;
+        }
+        
+        #controls-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #666;
+            font-size: 11px;
+            z-index: 100;
+        }
+        
+        #controls-hint kbd {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+        
+        .location-search {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .location-search input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .location-search input:focus {
+            border-color: #667eea;
+        }
+        
+        .location-search input::placeholder {
+            color: #555;
+        }
+        
+        .location-search button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        .location-search button:hover {
+            transform: scale(1.02);
+        }
+        
+        .location-search button:active {
+            transform: scale(0.98);
+        }
+        
+        .preset-locations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        
+        .preset-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 6px 10px;
+            color: #888;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="loader"></div>
+        <div class="loading-text">Cargando ciudad 3D...</div>
+    </div>
+    
+    <div id="canvas-container"></div>
+    
+    <div id="ui-overlay">
+        <div class="ui-panel">
+            <h1>3D City Generator</h1>
+            <div class="location-search">
+                <input type="text" id="location-input" placeholder="Latitud, Longitud (ej: 40.7128, -74.0060)">
+                <button id="search-btn">Buscar</button>
+            </div>
+            <div class="preset-locations">
+                <button class="preset-btn" data-lat="40.7128" data-lon="-74.0060">Nueva York</button>
+                <button class="preset-btn" data-lat="51.5074" data-lon="-0.1278">Londres</button>
+                <button class="preset-btn" data-lat="35.6762" data-lon="139.6503">Tokio</button>
+                <button class="preset-btn" data-lat="48.8566" data-lon="2.3522">París</button>
+                <button class="preset-btn" data-lat="19.4326" data-lon="-99.1332">CDMX</button>
+                <button class="preset-btn" data-lat="41.3851" data-lon="2.1734">Barcelona</button>
+            </div>
+        </div>
+        
+        <div class="ui-panel stats-panel">
+            <div class="stat-row">
+                <span class="stat-label">Edificios cargados</span>
+                <span class="stat-value" id="building-count">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Calles renderizadas</span>
+                <span class="stat-value" id="road-count">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Tiles activos</span>
+                <span class="stat-value" id="tile-count">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">FPS</span>
+                <span class="stat-value" id="fps-display">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="info-panel">
+        <h3>Edificio seleccionado</h3>
+        <div class="info-row">Niveles: <span id="info-levels">-</span></div>
+        <div class="info-row">Altura: <span id="info-height">-</span> m</div>
+        <div class="info-row">Tipo: <span id="info-type">-</span></div>
+        <div class="info-row">Nombre: <span id="info-name">-</span></div>
+    </div>
+    
+    <div id="controls-hint">
+        <kbd>Click</kbd> Arrastrar para rotar &nbsp;|&nbsp;
+        <kbd>Scroll</kbd> Zoom &nbsp;|&nbsp;
+        <kbd>Shift + Arrastrar</kbd> Mover &nbsp;|&nbsp;
+        <kbd>Click edificio</kbd> Seleccionar
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
