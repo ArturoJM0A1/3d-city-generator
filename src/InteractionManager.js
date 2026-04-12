@@ -251,21 +251,29 @@ export class InteractionManager {
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const distance = maxDim * 3;
+        const maxDim = Math.max(size.x, size.z);
+        const distance = Math.max(maxDim * 2, 100);
+        const height = Math.max(size.y * 1.5, 50);
         
         const camera = this.camera;
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        direction.y = 0;
+        direction.normalize();
+        
+        const right = new THREE.Vector3();
+        right.crossVectors(direction, new THREE.Vector3(0, 1, 0));
+        
+        const offsetAngle = Math.random() * Math.PI * 2;
         const targetPosition = new THREE.Vector3(
-            center.x + distance,
-            center.y + distance * 0.5,
-            center.z + distance
+            center.x + direction.x * distance + Math.cos(offsetAngle) * right.x * distance * 0.3,
+            center.y + height,
+            center.z + direction.z * distance + Math.cos(offsetAngle) * right.z * distance * 0.3
         );
         
         const startPosition = camera.position.clone();
-        const startTarget = camera.userData.target || new THREE.Vector3();
-        
         let progress = 0;
-        const duration = 1000;
+        const duration = 800;
         const startTime = performance.now();
         
         const animate = () => {
@@ -275,6 +283,12 @@ export class InteractionManager {
             const eased = this.easeOutCubic(progress);
             
             camera.position.lerpVectors(startPosition, targetPosition, eased);
+            
+            camera.lookAt(center.x, center.y + height * 0.3, center.z);
+            
+            if (this.controls) {
+                this.controls.target.lerp(center, eased * 0.1);
+            }
             
             if (progress < 1) {
                 requestAnimationFrame(animate);

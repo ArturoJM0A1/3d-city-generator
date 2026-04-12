@@ -6,7 +6,7 @@
 
 Generador de ciudades 3D interactivas usando datos reales de **OpenStreetMap** y **Three.js** con soporte para WebGPU.
 
-#Descripción
+# Descripción
 
 Este proyecto genera **ciudades 3D interactivas** directamente en el navegador usando Three.js. Imagina Google Earth pero construido automáticamente con código - sin necesidad de模型 3D manuales. El usuario puede explorar ciudades reales como Nueva York, Londres o Tokio, rotando la cámara, haciendo zoom y seleccionado edificios individuales para ver información.
 

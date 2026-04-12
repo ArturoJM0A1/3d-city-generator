@@ -166,8 +166,8 @@ export class TileManager {
         
         const groundGeometry = new THREE.PlaneGeometry(10000, 10000);
         const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x1a1a2e,
-            roughness: 0.9,
+            color: 0xcccccc,
+            roughness: 0.95,
             metalness: 0.1
         });
         
@@ -186,7 +186,7 @@ export class TileManager {
         const gridSize = 10000;
         const gridDivisions = 100;
         
-        const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x333355, 0x222244);
+        const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xaaaaaa, 0xdddddd);
         gridHelper.position.y = 0.1;
         gridHelper.material.opacity = 0.3;
         gridHelper.material.transparent = true;
