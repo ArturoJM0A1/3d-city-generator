@@ -32,7 +32,7 @@ export class SceneManager {
                 fillIntensity: 0.3,
                 fillPosition: { x: -100, y: 100, z: -100 },
                 exposure: 1.2,
-                ground: 0x1a1a2e,
+                ground: 0x333333,
                 groundRoughness: 0.9,
                 bloomStrength: 0.3
             },
@@ -43,7 +43,7 @@ export class SceneManager {
                 ambient: 0xffffff,
                 ambientIntensity: 0.8,
                 hemisphere: 0x87ceeb,
-                hemisphereGround: 0x8b7355,
+                hemisphereGround: 0xbbbbbb,
                 hemisphereIntensity: 0.6,
                 sun: 0xfffaf0,
                 sunIntensity: 2.0,
@@ -52,7 +52,7 @@ export class SceneManager {
                 fillIntensity: 0.5,
                 fillPosition: { x: -200, y: 200, z: -100 },
                 exposure: 1.0,
-                ground: 0x8fa87a,
+                ground: 0xcccccc,
                 groundRoughness: 0.95,
                 bloomStrength: 0.15
             }

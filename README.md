@@ -6,15 +6,26 @@
 
 Generador de ciudades 3D interactivas usando datos reales de **OpenStreetMap** y **Three.js** con soporte para WebGPU.
 
+#Descripción
+
+Este proyecto genera **ciudades 3D interactivas** directamente en el navegador usando Three.js. Imagina Google Earth pero construido automáticamente con código - sin necesidad de模型 3D manuales. El usuario puede explorar ciudades reales como Nueva York, Londres o Tokio, rotando la cámara, haciendo zoom y seleccionado edificios individuales para ver información.
+
+La magia ocurre gracias a **OpenStreetMap**, una base de datos geográfica gratuita que contiene millones de edificios, calles y carreteras mapeadas por voluntarios. El proyecto consulta esta base de datos mediante la Overpass API, descargando información sobre las coordenadas, alturas y tipos de edificios de una zona específica, y luego los convierte en geometría 3D visual.
+
+El código está organizado en módulos especializados: uno maneja las coordenadas geográficas (latitud/longitud a coordenadas 3D), otro conecta con la API de OpenStreetMap, otro genera los edificios con materiales realistas, otro maneja las calles y carreteras, y un sistema de "tiles" que carga y descarga datos según dónde mire la cámara para mantener el rendimiento fluido. Todo esto se renderiza usando WebGPU cuando está disponible (para máximo rendimiento) o WebGL como respaldo.
+
+
 ## 🚀 Características
 
 ### Datos Reales
+
 - **Edificios** con alturas reales de OpenStreetMap
 - **Calles y carreteras** categorizadas por tipo
 - **Ferrocarriles** con durmientes y rails
 - **Metadatos** (nombres, niveles, tipos de edificio)
 
 ### Renderizado Avanzado
+
 - **WebGPU** como renderer principal (con fallback WebGL2)
 - **Post-processing**: Bloom, SMAA anti-aliasing
 - **Sombras suaves** PCF
@@ -22,6 +33,7 @@ Generador de ciudades 3D interactivas usando datos reales de **OpenStreetMap** y
 - **Niebla atmosférica** exponencial
 
 ### Interactividad
+
 - **Controles orbitales** tipo mapa 3D
 - **Raycasting** para seleccionar edificios
 - **Hover effects** con highlight
@@ -29,6 +41,7 @@ Generador de ciudades 3D interactivas usando datos reales de **OpenStreetMap** y
 - **Búsqueda por ubicación** (geocoding)
 
 ### Optimización
+
 - **Carga progresiva** por tiles
 - **LOD** (Level of Detail) para grandes ciudades
 - **Cache** de datos OSM
@@ -103,6 +116,7 @@ Generador de ciudades 3D interactivas usando datos reales de **OpenStreetMap** y
 ## 🔧 Instalación
 
 ### Requisitos
+
 - **Node.js** 18 o superior
 - **npm** o **yarn**
 
@@ -134,25 +148,27 @@ npm run preview
 
 ## 🎮 Controles
 
-| Acción | Función |
-|--------|---------|
-| **Click + Arrastrar** | Rotar cámara |
-| **Scroll** | Zoom in/out |
-| **Shift + Arrastrar** | Mover cámara (pan) |
+
+| Acción               | Función                   |
+| --------------------- | -------------------------- |
+| **Click + Arrastrar** | Rotar cámara              |
+| **Scroll**            | Zoom in/out                |
+| **Shift + Arrastrar** | Mover cámara (pan)        |
 | **Click en edificio** | Seleccionar y mostrar info |
-| **Doble click** | Volar hacia el edificio |
-| **Click en preset** | Cambiar ubicación |
+| **Doble click**       | Volar hacia el edificio    |
+| **Click en preset**   | Cambiar ubicación         |
 
 ## 🌍 Ubicaciones Predefinidas
 
-| Ciudad | Latitud | Longitud |
-|--------|---------|----------|
+
+| Ciudad     | Latitud | Longitud |
+| ---------- | ------- | -------- |
 | Nueva York | 40.7128 | -74.0060 |
-| Londres | 51.5074 | -0.1278 |
-| Tokio | 35.6762 | 139.6503 |
-| París | 48.8566 | 2.3522 |
-| CDMX | 19.4326 | -99.1332 |
-| Barcelona | 41.3851 | 2.1734 |
+| Londres    | 51.5074 | -0.1278  |
+| Tokio      | 35.6762 | 139.6503 |
+| París     | 48.8566 | 2.3522   |
+| CDMX       | 19.4326 | -99.1332 |
+| Barcelona  | 41.3851 | 2.1734   |
 
 ## 🔌 API de OpenStreetMap
 
@@ -167,6 +183,7 @@ https://overpass-api.de/api/interpreter
 #### Queries utilizadas
 
 **Edificios:**
+
 ```
 [out:json][timeout:60];
 way["building"](around:RADIO,LAT,LON);
@@ -176,6 +193,7 @@ out skel qt;
 ```
 
 **Carreteras:**
+
 ```
 [out:json][timeout:60];
 way["highway"](around:RADIO,LAT,LON);
@@ -187,6 +205,7 @@ out skel qt;
 ### Manejo de errores
 
 El sistema incluye:
+
 - 4 servidores Overpass de backup
 - Retry automático con backoff exponencial
 - Cache de 5 minutos
@@ -196,14 +215,15 @@ El sistema incluye:
 
 ### Optimizaciones implementadas
 
-| Técnica | Beneficio |
-|---------|-----------|
-| **Instancing** | Reduce draw calls |
-| **Geometry merging** | Un mesh en lugar de muchos |
-| **Frustum culling** | No renderiza lo invisible |
-| **LOD** | Geometría simple a distancia |
-| **Tile unloading** | Libera memoria de tiles lejanos |
-| **RequestAnimationFrame** | Sync con refresh rate |
+
+| Técnica                  | Beneficio                       |
+| ------------------------- | ------------------------------- |
+| **Instancing**            | Reduce draw calls               |
+| **Geometry merging**      | Un mesh en lugar de muchos      |
+| **Frustum culling**       | No renderiza lo invisible       |
+| **LOD**                   | Geometría simple a distancia   |
+| **Tile unloading**        | Libera memoria de tiles lejanos |
+| **RequestAnimationFrame** | Sync con refresh rate           |
 
 ### Targets
 
@@ -256,6 +276,7 @@ this.unloadRadius = 3;      // Tiles a descargar
 La Overpass API puede estar sobrecargada. El sistema mostrará una ciudad de demostración.
 
 **Soluciones:**
+
 1. Esperar y reintentar
 2. Usar ubicaciones con más densidad de edificios
 3. Implementar tu propio servidor Overpass
@@ -269,6 +290,7 @@ La Overpass API puede estar sobrecargada. El sistema mostrará una ciudad de dem
 ### Error de CORS
 
 Normalmente no ocurre porque se usa POST directo. Si persiste, verificar:
+
 1. Conexión a internet
 2. Firewall
 3. Extensiones del navegador
@@ -319,7 +341,6 @@ MIT License - Libre para uso comercial y personal.
 - [OpenStreetMap Wiki](https://wiki.openstreetmap.org/)
 - [Overpass API Documentation](https://wiki.openstreetmap.org/wiki/Overpass_API)
 - [WebGPU Specification](https://www.w3.org/TR/webgpu/)
-
 
 ---
 
