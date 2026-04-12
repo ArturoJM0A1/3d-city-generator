@@ -24,23 +24,36 @@ class CityGenerator {
     }
     
     async init() {
-        this.sceneManager = new SceneManager(this.container);
-        this.tileManager = new TileManager(this.centerLat, this.centerLon, this.sceneManager.scene);
-        this.interactionManager = new InteractionManager(
-            this.sceneManager.camera,
-            this.sceneManager.renderer,
-            this.sceneManager.scene
-        );
-        
-        this.setupEventListeners();
-        this.setupUI();
-        
-        this.tileManager.createGround();
-        
-        await this.loadInitialArea();
-        
-        this.isInitialized = true;
-        this.hideLoading();
+        try {
+            this.sceneManager = new SceneManager(this.container);
+            this.tileManager = new TileManager(this.centerLat, this.centerLon, this.sceneManager.scene);
+            this.interactionManager = new InteractionManager(
+                this.sceneManager.camera,
+                this.sceneManager.renderer,
+                this.sceneManager.scene
+            );
+            
+            this.setupEventListeners();
+            this.setupUI();
+            
+            this.tileManager.createGround();
+            
+            setTimeout(() => {
+                if (!this.isInitialized) {
+                    console.log('Forzando inicio después de timeout...');
+                    this.hideLoading();
+                }
+            }, 20000);
+            
+            await this.loadInitialArea();
+            
+            this.isInitialized = true;
+            this.hideLoading();
+            
+        } catch (error) {
+            console.error('Error inicializando:', error);
+            this.hideLoading();
+        }
         
         this.animate();
     }
@@ -148,14 +161,28 @@ class CityGenerator {
     
     async loadInitialArea() {
         const initialTiles = 2;
+        const tiles = [];
         
         for (let dx = -initialTiles; dx <= initialTiles; dx++) {
             for (let dz = -initialTiles; dz <= initialTiles; dz++) {
-                await this.tileManager.loadTile(dx, dz);
+                tiles.push(this.tileManager.loadTile(dx, dz));
             }
         }
         
+        const timeoutPromise = new Promise(resolve => {
+            setTimeout(() => {
+                console.log('Timeout alcanzado, mostrando ciudad demo...');
+                resolve('timeout');
+            }, 15000);
+        });
+        
+        await Promise.race([
+            Promise.allSettled(tiles),
+            timeoutPromise
+        ]);
+        
         this.tileManager.currentCenterTile = { x: 0, z: 0 };
+        this.hideLoading();
     }
     
     updateStatsUI(stats) {

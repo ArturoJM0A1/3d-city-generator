@@ -83,15 +83,20 @@ export class OSMService {
         
         const shuffledServers = [...this.OVERPASS_SERVERS].sort(() => Math.random() - 0.5);
         
-        let allFailed = true;
+        const maxTime = 8000;
+        const startTime = Date.now();
         
         for (const server of shuffledServers) {
-            for (let retry = 0; retry < retries; retry++) {
+            if (Date.now() - startTime > maxTime) break;
+            
+            for (let retry = 0; retry < 2; retry++) {
+                if (Date.now() - startTime > maxTime) break;
+                
                 try {
-                    console.log(`Consultando ${server} (intento ${retry + 1}/${retries})...`);
+                    console.log(`Consultando ${server}...`);
                     
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 45000);
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
                     
                     const response = await fetch(server, {
                         method: 'POST',
@@ -106,38 +111,28 @@ export class OSMService {
                     
                     if (response.status === 429) {
                         console.warn(`Rate limit en ${server}`);
-                        await this.delay(2000);
                         continue;
                     }
                     
                     if (!response.ok) {
-                        console.warn(`HTTP ${response.status} desde ${server}`);
-                        await this.delay(1000);
+                        console.warn(`HTTP ${response.status}`);
                         continue;
                     }
                     
                     const data = await response.json();
                     
-                    if (!data.elements || data.elements.length === 0) {
-                        console.warn('No se encontraron datos para esta ubicación');
-                    }
-                    
                     this.cache.set(cacheKey, { data, timestamp: Date.now() });
-                    allFailed = false;
                     return data;
                     
                 } catch (error) {
                     const errorMsg = error.name === 'AbortError' ? 'Timeout' : error.message;
-                    console.warn(`Error con ${server}: ${errorMsg}`);
-                    await this.delay(2000 * (retry + 1));
+                    console.warn(`Error: ${errorMsg}`);
                 }
             }
         }
         
-        if (allFailed) {
-            console.log('API no disponible. Generando ciudad de demostración...');
-            return this.generateMockData();
-        }
+        console.log('Generando ciudad demo...');
+        return this.generateMockData();
     }
     
     static generateMockData() {
