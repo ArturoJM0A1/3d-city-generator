@@ -8,12 +8,11 @@ Generador de ciudades 3D interactivas usando datos reales de **OpenStreetMap** y
 
 # Descripción
 
-Este proyecto genera **ciudades 3D interactivas** directamente en el navegador usando Three.js. Imagina Google Earth pero construido automáticamente con código - sin necesidad de模型 3D manuales. El usuario puede explorar ciudades reales como Nueva York, Londres o Tokio, rotando la cámara, haciendo zoom y seleccionado edificios individuales para ver información.
+Este proyecto genera **ciudades 3D interactivas** directamente en el navegador usando Three.js. El usuario puede explorar ciudades reales como Nueva York, Ciudad de México o Monterrey, rotando la cámara, haciendo zoom y seleccionado edificios individuales para ver información.
 
 La magia ocurre gracias a **OpenStreetMap**, una base de datos geográfica gratuita que contiene millones de edificios, calles y carreteras mapeadas por voluntarios. El proyecto consulta esta base de datos mediante la Overpass API, descargando información sobre las coordenadas, alturas y tipos de edificios de una zona específica, y luego los convierte en geometría 3D visual.
 
 El código está organizado en módulos especializados: uno maneja las coordenadas geográficas (latitud/longitud a coordenadas 3D), otro conecta con la API de OpenStreetMap, otro genera los edificios con materiales realistas, otro maneja las calles y carreteras, y un sistema de "tiles" que carga y descarga datos según dónde mire la cámara para mantener el rendimiento fluido. Todo esto se renderiza usando WebGPU cuando está disponible (para máximo rendimiento) o WebGL como respaldo.
-
 
 ## 🚀 Características
 
